@@ -6,6 +6,7 @@ import (
 	"github.com/stakater/Reloader/internal/pkg/util"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
+	secretsstorev1 "sigs.k8s.io/secrets-store-csi-driver/apis/v1"
 )
 
 // ResourceUpdatedHandler contains updated objects
@@ -40,6 +41,9 @@ func (r ResourceUpdatedHandler) GetConfig() (util.Config, string) {
 	} else if _, ok := r.Resource.(*v1.Secret); ok {
 		oldSHAData = util.GetSHAfromSecret(r.OldResource.(*v1.Secret).Data)
 		config = util.GetSecretConfig(r.Resource.(*v1.Secret))
+	} else if _, ok := r.Resource.(*secretsstorev1.SecretProviderClass); ok {
+		oldSHAData = util.GetSHAfromSecret(r.OldResource.(*secretsstorev1.SecretProviderClass))
+		config = util.GetSecretConfig(r.Resource.(*secretsstorev1.SecretProviderClass))
 	} else {
 		logrus.Warnf("Invalid resource: Resource should be 'Secret' or 'Configmap' but found, %v", r.Resource)
 	}
